@@ -1,17 +1,37 @@
 {
-  "goal": "Tell me a joke and write it to 'joke.txt'.",
+  "goal": "Create a file named 'framework_test_success.txt' with the current date and a brief message, then list the directory to confirm its existence.",
   "plan": [
     {
-      "task": "Generate a joke using an AI or by writing an original one.",
+      "task": "Import the date module and get the current date string",
+      "type": "SPECIALIST"
+    },
+    {
+      "task": "Design the logic to format the message string containing the date and success message",
       "type": "ARCHITECT"
     },
     {
-      "task": "Create a file named 'joke.txt'.",
+      "task": "Open the file 'framework_test_success.txt' in write mode",
       "type": "SPECIALIST"
     },
     {
-      "task": "Write the generated joke text to the 'joke.txt' file.",
+      "task": "Write the formatted message string to the open file",
       "type": "SPECIALIST"
+    },
+    {
+      "task": "Close the file to ensure data is saved",
+      "type": "SPECIALIST"
+    },
+    {
+      "task": "Integrate the file writing steps into a single script flow",
+      "type": "ARCHITECT"
+    },
+    {
+      "task": "Use the operating system module to list the contents of the current directory",
+      "type": "SPECIALIST"
+    },
+    {
+      "task": "Design the final script to create the file and then list the directory for confirmation",
+      "type": "ARCHITECT"
     }
   ],
   "completed": 0,

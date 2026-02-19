@@ -152,7 +152,7 @@ def agent_loop(model_name, initial_prompt=None):
         messages.append({'role': 'user', 'content': user_input})
 
 if __name__ == "__main__":
-    model = "qwen2.5-coder:7b"
+    model = "qwen2.5:0.5b"
     prompt = sys.argv[1] if len(sys.argv) > 1 else None
     print(f"--- Starting Agent with {model} ---")
     agent_loop(model, prompt)

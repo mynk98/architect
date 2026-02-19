@@ -16,5 +16,11 @@
     "timestamp": "2026-02-20 00:18:39",
     "content": "Joke saved to 'joke.txt': Why did the tomato turn red?\nBecause it saw the salad dressing!",
     "tags": []
+  },
+  {
+    "id": 4,
+    "timestamp": "2026-02-20 00:51:16",
+    "content": "def aggregate_system_data(cpu_usage, ram_usage, disk_space):\n    with open('/tmp/system_monitor_output.txt', 'a') as file:\n        file.write(f'CPU Usage: {cpu_usage}%\\n')\n        file.write(f'RAM Usage: {ram_usage} GB\\n')\n        for drive, space in disk_space.items():\n            file.write(f'Disk Space on {drive}: {space} GB\\n')\nJoke saved to 'joke.txt': Why did the tomato turn red?\nBecause it saw the salad dressing!",
+    "tags": []
   }
 ]

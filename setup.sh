@@ -31,9 +31,10 @@ AVAILABLE_MODELS=$(ollama list | awk 'NR>1 {print $1}')
 
 if [ -z "$AVAILABLE_MODELS" ]; then
     echo -e "${RED}[!] No local models found in Ollama.${NC}"
-    echo "Recommended for Specialist: qwen2.5-coder:7b"
+    echo "Recommended for Specialist: qwen2.5:0.5b"
     echo "Recommended for Architect: deepseek-v3.1:671b-cloud (if configured)"
-    read -p "Enter a model name to download (e.g., qwen2.5-coder:7b): " NEW_MODEL
+    read -p "Enter a model name to download [default: qwen2.5:0.5b]: " NEW_MODEL
+    NEW_MODEL=${NEW_MODEL:-"qwen2.5:0.5b"}
     echo -e "${BLUE}[*] Pulling $NEW_MODEL...${NC}"
     ollama pull "$NEW_MODEL"
     AVAILABLE_MODELS=$NEW_MODEL
@@ -46,10 +47,8 @@ echo "-----------------------"
 read -p "Enter name for PRIMARY (Architect) model [default: deepseek-v3.1:671b-cloud]: " PRIMARY
 PRIMARY=${PRIMARY:-"deepseek-v3.1:671b-cloud"}
 
-read -p "Enter name for SPECIALIST (Local) model: " SPECIALIST
-while [ -z "$SPECIALIST" ]; do
-    read -p "${RED}Specialist model is required. Enter name: ${NC}" SPECIALIST
-done
+read -p "Enter name for SPECIALIST (Local) model [default: qwen2.5:0.5b]: " SPECIALIST
+SPECIALIST=${SPECIALIST:-"qwen2.5:0.5b"}
 
 # 4. Save Configuration
 mkdir -p data/state

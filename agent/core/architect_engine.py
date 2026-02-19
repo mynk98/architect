@@ -15,7 +15,7 @@ class ArchitectEngine:
         
         # 2. Priority: Argument > Config > Default
         self.primary_model = primary_model or config.get("primary_model", "deepseek-v3.1:671b-cloud")
-        self.specialist_model = specialist_model or config.get("specialist_model", "qwen2.5-coder:7b")
+        self.specialist_model = specialist_model or config.get("specialist_model", "qwen2.5:0.5b")
         
         self.memory = MemoryManager()
         self.tools = ToolRegistry(memory_manager=self.memory)

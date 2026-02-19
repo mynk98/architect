@@ -2,7 +2,7 @@ import ollama
 import json
 
 class Planner:
-    def __init__(self, primary_model="deepseek-v3.1:671b-cloud", fallback_model="qwen2.5-coder:7b"):
+    def __init__(self, primary_model="deepseek-v3.1:671b-cloud", fallback_model="qwen2.5:0.5b"):
         self.primary_model = primary_model
         self.fallback_model = fallback_model
 
