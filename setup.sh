@@ -53,10 +53,12 @@ done
 
 # 4. Save Configuration
 mkdir -p data/state
-echo -e "{
+cat <<EOF > data/state/config.json
+{
   "primary_model": "$PRIMARY",
   "specialist_model": "$SPECIALIST"
-}" > data/state/config.json
+}
+EOF
 echo -e "${GREEN}[✓] Configuration saved to data/state/config.json${NC}"
 
 # 5. Environment Setup
@@ -68,11 +70,16 @@ uv pip install ollama duckduckgo-search
 echo -e "${GREEN}[✓] Virtual environment ready.${NC}"
 
 # 6. Alias Setup
+ARCH_PATH="$(pwd)/arch_launcher.sh"
 if ! grep -q "alias arch=" ~/.zshrc; then
     echo -e "
 ${BLUE}[*] Adding 'arch' alias to ~/.zshrc...${NC}"
-    echo "alias arch='/Users/abhisheksonkar/Project/architect/arch_launcher.sh'" >> ~/.zshrc
+    echo "alias arch='$ARCH_PATH'" >> ~/.zshrc
     echo -e "${GREEN}[✓] Alias added. Run 'source ~/.zshrc' to activate.${NC}"
+else
+    echo -e "
+${BLUE}[*] Updating 'arch' alias in ~/.zshrc...${NC}"
+    sed -i '' "s|alias arch=.*|alias arch='$ARCH_PATH'|g" ~/.zshrc
 fi
 
 echo -e "

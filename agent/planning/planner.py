@@ -27,23 +27,33 @@ class Planner:
                 model=self.primary_model,
                 messages=[{'role': 'user', 'content': prompt}]
             )
-            return self._parse_plan(response['message']['content'])
+            plan = self._parse_plan(response['message']['content'])
+            if plan: return plan
         except Exception as e:
-            print(f"[!] Primary Planner Failed: {e}. Falling back to {self.fallback_model}...")
-            try:
-                response = ollama.chat(
-                    model=self.fallback_model,
-                    messages=[{'role': 'user', 'content': prompt}]
-                )
-                return self._parse_plan(response['message']['content'])
-            except Exception as fe:
-                print(f"[!!] Total Planning Failure: {fe}")
-                return [{"task": goal, "type": "SPECIALIST"}]
+            print(f"[!] Primary Planner Failed: {e}.")
+        
+        print(f"[*] Falling back to {self.fallback_model} for planning...")
+        try:
+            response = ollama.chat(
+                model=self.fallback_model,
+                messages=[{'role': 'user', 'content': prompt}]
+            )
+            plan = self._parse_plan(response['message']['content'])
+            if plan: return plan
+        except Exception as fe:
+            print(f"[!!] Total Planning Failure: {fe}")
+        
+        # Absolute fallback: treat the goal as a single specialist task
+        return [{"task": goal, "type": "SPECIALIST"}]
 
     def _parse_plan(self, content):
         try:
+            # Look for everything from the first [ to the last ]
             if "[" in content and "]" in content:
                 json_str = content[content.find("["):content.rfind("]")+1]
-                return json.loads(json_str)
-        except: pass
+                data = json.loads(json_str)
+                if isinstance(data, list):
+                    return data
+        except:
+            pass
         return None

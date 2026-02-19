@@ -126,12 +126,50 @@ class ArchitectEngine:
         with open(self.state_file, 'w') as f: json.dump(state, f, indent=2)
 
     def _fallback_parse(self, content):
+        if not content: return None
         calls = []
-        pattern = r'\{"name":\s*"[^"]+",\s*"arguments":\s*\{.*?\}\}'
+        # Try to find JSON objects that look like tool calls
+        # This pattern looks for {"name": "...", "arguments": {...}}
+        pattern = r'\{\s*"name":\s*"[^"]+",\s*"arguments":\s*\{.*?\}(?=\s*\}|$\s*)\s*\}'
         matches = re.finditer(pattern, content, re.DOTALL)
+        
         for match in matches:
             try:
                 data = json.loads(match.group(0))
-                calls.append({'function': data})
-            except: continue
+                if 'name' in data and 'arguments' in data:
+                    calls.append({'function': data})
+            except Exception as e:
+                # Try a more aggressive approach if direct JSON load fails
+                try:
+                    # Sometimes models output extra braces or missing ones
+                    text = match.group(0)
+                    # Count braces to find a balanced object
+                    brace_count = 0
+                    for idx, char in enumerate(text):
+                        if char == '{': brace_count += 1
+                        elif char == '}': brace_count -= 1
+                        if brace_count == 0 and idx > 0:
+                            data = json.loads(text[:idx+1])
+                            if 'name' in data and 'arguments' in data:
+                                calls.append({'function': data})
+                                break
+                except: continue
+        
+        if not calls:
+            # Last resort: check if the entire content is a JSON object
+            try:
+                clean_content = content.strip()
+                if clean_content.startswith("```json"):
+                    clean_content = clean_content[7:]
+                if clean_content.endswith("```"):
+                    clean_content = clean_content[:-3]
+                clean_content = clean_content.strip()
+                data = json.loads(clean_content)
+                if 'name' in data and 'arguments' in data:
+                    calls.append({'function': data})
+                elif isinstance(data, list) and len(data) > 0 and 'name' in data[0]:
+                    for item in data:
+                        calls.append({'function': item})
+            except: pass
+
         return calls if calls else None

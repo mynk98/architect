@@ -1,45 +1,17 @@
 {
-  "goal": "Architect a complex system monitor script in Python that checks CPU, RAM, and Disk.",
+  "goal": "Tell me a joke and write it to 'joke.txt'.",
   "plan": [
     {
-      "task": "Design the overall architecture for the system monitor script in Python, including the structure of files and modules.",
+      "task": "Generate a joke using an AI or by writing an original one.",
       "type": "ARCHITECT"
     },
     {
-      "task": "Implement a function to retrieve CPU usage data using an appropriate library or command line interface (CLI).",
+      "task": "Create a file named 'joke.txt'.",
       "type": "SPECIALIST"
     },
     {
-      "task": "Develop a function to fetch RAM usage information from the system.",
+      "task": "Write the generated joke text to the 'joke.txt' file.",
       "type": "SPECIALIST"
-    },
-    {
-      "task": "Create a module for interfacing with disk space monitoring, possibly using built-in Python libraries or third-party tools.",
-      "type": "ARCHITECT"
-    },
-    {
-      "task": "Write a function to calculate and format the CPU usage percentage from raw data.",
-      "type": "SPECIALIST"
-    },
-    {
-      "task": "Implement a method to display the RAM usage in a readable format, such as MB or GB.",
-      "type": "SPECIALIST"
-    },
-    {
-      "task": "Design and implement a function that checks disk space availability on various drives and returns formatted results.",
-      "type": "ARCHITECT"
-    },
-    {
-      "task": "Create a user interface function that aggregates all system monitoring data into a single output format, such as a print statement or a GUI window.",
-      "type": "ARCHITECT"
-    },
-    {
-      "task": "Add error handling to manage any exceptions that may occur during the execution of the monitoring functions.",
-      "type": "SPECIALIST"
-    },
-    {
-      "task": "Test the system monitor script in various environments to ensure it functions correctly and efficiently.",
-      "type": "ARCHITECT"
     }
   ],
   "completed": 0,

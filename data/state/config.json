@@ -1,0 +1,4 @@
+{
+  "primary_model": "deepseek-v3.1:671b-cloud",
+  "specialist_model": "qwen2.5-coder:7b"
+}
