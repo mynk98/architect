@@ -1,0 +1,1 @@
+import requests\n\ndef get_bitcoin_price():\n    response = requests.get('https://api.coindesk.com/v1/bpi/currentprice.json')\n    if response.status_code == 200:\n        return response.json()['bpi']['USD']['rate']\n    else:\n        raise Exception("Failed to fetch Bitcoin price")\n\nif __name__ == \"__main__\":\n    print(get_bitcoin_price())
