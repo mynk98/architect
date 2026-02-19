@@ -66,7 +66,7 @@ echo -e "
 ${BLUE}--- Environment Setup ---${NC}"
 uv venv ollama_agent_env
 source ollama_agent_env/bin/activate
-uv pip install ollama duckduckgo-search
+uv pip install ollama duckduckgo-search requests
 echo -e "${GREEN}[✓] Virtual environment ready.${NC}"
 
 # 6. Alias Setup

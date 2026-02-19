@@ -5,11 +5,11 @@ import os
 
 # Add current folder to path so we can import from qwen
 sys.path.append(os.getcwd())
-from agent.core.engine import QwenEngine
+from agent.core.architect_engine import ArchitectEngine
 
 def autonomous_test():
     print("--- Starting Autonomous Validation of Qwen Agent ---")
-    agent = QwenEngine()
+    agent = ArchitectEngine()
     
     # Task: "Create a file named 'hello.txt' with content 'world', then save this action to your memory."
     user_input = "Create a file named 'hello.txt' with content 'world', then save this action to your memory."
@@ -28,7 +28,7 @@ def autonomous_test():
     for i in range(max_turns):
         print(f"\n[Turn {i+1}] Thinking...")
         response = ollama.chat(
-            model=agent.model,
+            model=agent.specialist_model,
             messages=history,
             tools=agent.tools.get_definitions()
         )
