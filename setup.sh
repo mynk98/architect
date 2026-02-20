@@ -3,6 +3,7 @@
 # --- Multi-Model Architect Setup Script ---
 RED='\033[0;31m'
 GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
@@ -20,21 +21,19 @@ echo -e "${GREEN}[✓] Ollama detected.${NC}"
 if ! command -v uv &> /dev/null; then
     echo -e "${BLUE}[*] Installing uv for faster setup...${NC}"
     curl -LsSf https://astral.sh/uv/install.sh | sh
-    source $HOME/.cargo/env
+    # Source for current shell
+    export PATH="$HOME/.astral-uv/bin:$PATH"
 fi
 echo -e "${GREEN}[✓] uv detected.${NC}"
 
 # 3. Model Management
-echo -e "
-${BLUE}--- Model Configuration ---${NC}"
+echo -e "\n${BLUE}--- Model Configuration ---${NC}"
 AVAILABLE_MODELS=$(ollama list | awk 'NR>1 {print $1}')
 
 if [ -z "$AVAILABLE_MODELS" ]; then
-    echo -e "${RED}[!] No local models found in Ollama.${NC}"
-    echo "Recommended for Specialist: qwen2.5:0.5b"
-    echo "Recommended for Architect: deepseek-v3.1:671b-cloud (if configured)"
-    read -p "Enter a model name to download [default: qwen2.5:0.5b]: " NEW_MODEL
-    NEW_MODEL=${NEW_MODEL:-"qwen2.5:0.5b"}
+    echo -e "${YELLOW}[!] No local models found in Ollama.${NC}"
+    read -p "Enter a model name to download [default: qwen2.5-coder:7b]: " NEW_MODEL
+    NEW_MODEL=${NEW_MODEL:-"qwen2.5-coder:7b"}
     echo -e "${BLUE}[*] Pulling $NEW_MODEL...${NC}"
     ollama pull "$NEW_MODEL"
     AVAILABLE_MODELS=$NEW_MODEL
@@ -44,11 +43,11 @@ echo -e "Available local models:"
 echo "$AVAILABLE_MODELS"
 echo "-----------------------"
 
-read -p "Enter name for PRIMARY (Architect) model [default: deepseek-v3.1:671b-cloud]: " PRIMARY
+read -p "Enter PRIMARY model [default: deepseek-v3.1:671b-cloud]: " PRIMARY
 PRIMARY=${PRIMARY:-"deepseek-v3.1:671b-cloud"}
 
-read -p "Enter name for SPECIALIST (Local) model [default: qwen2.5:0.5b]: " SPECIALIST
-SPECIALIST=${SPECIALIST:-"qwen2.5:0.5b"}
+read -p "Enter SPECIALIST model [default: qwen2.5-coder:7b]: " SPECIALIST
+SPECIALIST=${SPECIALIST:-"qwen2.5-coder:7b"}
 
 # 4. Save Configuration
 mkdir -p data/state
@@ -61,26 +60,57 @@ EOF
 echo -e "${GREEN}[✓] Configuration saved to data/state/config.json${NC}"
 
 # 5. Environment Setup
-echo -e "
-${BLUE}--- Environment Setup ---${NC}"
+echo -e "\n${BLUE}--- Environment Setup ---${NC}"
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# Create venv in the parent directory as per launcher expectation
+cd "$PROJECT_ROOT"
 uv venv ollama_agent_env
 source ollama_agent_env/bin/activate
-uv pip install ollama duckduckgo-search requests
+uv pip install ollama requests
 echo -e "${GREEN}[✓] Virtual environment ready.${NC}"
 
-# 6. Alias Setup
-ARCH_PATH="$(pwd)/arch_launcher.sh"
-if ! grep -q "alias arch=" ~/.zshrc; then
-    echo -e "
-${BLUE}[*] Adding 'arch' alias to ~/.zshrc...${NC}"
-    echo "alias arch='$ARCH_PATH'" >> ~/.zshrc
-    echo -e "${GREEN}[✓] Alias added. Run 'source ~/.zshrc' to activate.${NC}"
+# 6. Global Command Setup (arch)
+echo -e "\n${BLUE}--- Global Command Setup ---${NC}"
+ARCH_LAUNCHER="$(pwd)/architect/arch_launcher.sh"
+# Escape spaces for the alias
+ARCH_LAUNCHER_ESCAPED="${ARCH_LAUNCHER// /\\ }"
+
+# Add alias to .zshrc
+if ! grep -q "alias arch=" ~/.zshrc 2>/dev/null; then
+    echo -e "[*] Adding 'arch' alias to ~/.zshrc..."
+    echo "alias arch='$ARCH_LAUNCHER_ESCAPED'" >> ~/.zshrc
 else
-    echo -e "
-${BLUE}[*] Updating 'arch' alias in ~/.zshrc...${NC}"
-    sed -i '' "s|alias arch=.*|alias arch='$ARCH_PATH'|g" ~/.zshrc
+    echo -e "[*] Updating 'arch' alias in ~/.zshrc..."
+    sed -i '' "s|alias arch=.*|alias arch='$ARCH_LAUNCHER_ESCAPED'|g" ~/.zshrc
 fi
 
-echo -e "
-${GREEN}=== Setup Complete! ===${NC}"
-echo "You can now run the agent using: arch "your task""
+# Attempt to create symbolic link in Antigravity bin if it exists
+ANTIGRAVITY_BIN="$HOME/.antigravity/antigravity/bin"
+if [ -d "$ANTIGRAVITY_BIN" ]; then
+    echo -e "[*] Antigravity detected. Creating symbolic link..."
+    ln -sf "$ARCH_LAUNCHER" "$ANTIGRAVITY_BIN/arch"
+    echo -e "${GREEN}[✓] Global binary linked to $ANTIGRAVITY_BIN/arch${NC}"
+fi
+
+# 7. Check for Lyra Context
+if [ -f "$(pwd)/lyra_launcher.sh" ]; then
+    echo -e "\n${BLUE}--- Lyra Personality Setup ---${NC}"
+    LYRA_LAUNCHER="$(pwd)/lyra_launcher.sh"
+    LYRA_LAUNCHER_ESCAPED="${LYRA_LAUNCHER// /\\ }"
+    
+    if ! grep -q "alias lyra=" ~/.zshrc 2>/dev/null; then
+        echo "alias lyra='$LYRA_LAUNCHER_ESCAPED'" >> ~/.zshrc
+    else
+        sed -i '' "s|alias lyra=.*|alias lyra='$LYRA_LAUNCHER_ESCAPED'|g" ~/.zshrc
+    fi
+    
+    if [ -d "$ANTIGRAVITY_BIN" ]; then
+        ln -sf "$LYRA_LAUNCHER" "$ANTIGRAVITY_BIN/lyra"
+    fi
+    echo -e "${GREEN}[✓] 'lyra' command also configured.${NC}"
+fi
+
+echo -e "\n${GREEN}=== Setup Complete! ===${NC}"
+echo -e "1. Run ${YELLOW}source ~/.zshrc${NC} to activate commands."
+echo -e "2. Type ${YELLOW}arch${NC} to start the AI agent (REPL)."
+echo -e "3. Type ${YELLOW}arch \"your prompt\"${NC} for direct tasks."
