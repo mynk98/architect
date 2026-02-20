@@ -5,7 +5,7 @@
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$SCRIPT_DIR"
-source ollama_agent_env/bin/activate
+source "$SCRIPT_DIR/../ollama_agent_env/bin/activate"
 
 MODEL=${2:-"deepseek-v3.1:671b-cloud"}
 
