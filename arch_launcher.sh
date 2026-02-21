@@ -7,6 +7,6 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$SCRIPT_DIR"
 source "$SCRIPT_DIR/../ollama_agent_env/bin/activate"
 
-MODEL=${2:-"deepseek-v3.1:671b-cloud"}
+MODEL=${2:-"qwen2.5-coder:7b"}
 
-python3 run_agent.py "$1" "$MODEL"
+python3 agent/main.py "$1" "$MODEL"

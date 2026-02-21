@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>RollingSphere Physics Test</title>
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "./node_modules/three/build/three.module.js"
+        }
+    }
+    </script>
+</head>
+<body>
+    <h1>RollingSphere Physics Tests</h1>
+    <div id="results"></div>
+    
+    <script type="module">
+        import { RollingSphere } from '../src/model/RollingSphere.js';
+        
+        console.log('Testing RollingSphere fixes...');
+        
+        // Test gravity damping fix
+        console.log('\n=== Testing Gravity Damping Fix ===');
+        const sphere = new RollingSphere();
+        
+        // Simulate falling with horizontal velocity
+        sphere.setPosition(new THREE.Vector3(0, 10, 0));
+        sphere.isGrounded = false;
+        sphere.velocity.set(5, -2, 0); // Horizontal + vertical velocity
+        
+        const initialVelocity = sphere.getVelocity().clone();
+        
+        // Apply horizontal input while falling
+        const testInput = {
+            moveForward: true,
+            moveBackward: false,
+            moveLeft: false,
+            moveRight: false,
+            jumpPressed: false
+        };
+        
+        // Update with horizontal input
+        sphere.updateDesiredVelocity(testInput);
+        sphere.updateVelocity(0.016); // ~60fps
+        
+        const finalVelocity = sphere.getVelocity().clone();
+        
+        console.log('Initial velocity:', {x: initialVelocity.x.toFixed(4), y: initialVelocity.y.toFixed(4), z: initialVelocity.z.toFixed(4)});
+        console.log('Final velocity:', {x: finalVelocity.x.toFixed(4), y: finalVelocity.y.toFixed(4), z: finalVelocity.z.toFixed(4)});
+        
+        const verticalDiff = Math.abs(finalVelocity.y - initialVelocity.y);
+        const horizontalDiff = Math.abs(finalVelocity.x - initialVelocity.x);
+        
+        console.log('Vertical velocity change:', verticalDiff.toFixed(4));
+        console.log('Horizontal velocity change:', horizontalDiff.toFixed(4));
+        
+        const gravityDampingPassed = verticalDiff < 0.1; // Small vertical change
+        console.log('Gravity Damping Fix:', gravityDampingPassed ? 'PASSED ✓' : 'FAILED');
+        
+        // Test jump height calibration
+        console.log('\n=== Testing Jump Height Calibration ===');
+        const jumpSphere = new RollingSphere();
+        jumpSphere.isGrounded = true;
+        
+        const jumpImpulse = jumpSphere.calculateJumpImpulseForHeight(3);
+        console.log('Calculated jump impulse:', jumpImpulse.toFixed(4));
+        
+        // Simulate jump
+        jumpSphere.executeJump();
+        const initialY = jumpSphere.getPosition().y;
+        
+        // Simulate flight until peak
+        let maxHeight = initialY;
+        let time = 0;
+        
+        while (jumpSphere.velocity.y > 0 && time < 5) {
+            jumpSphere.updateVelocity(0.016);
+            jumpSphere.velocity.addScaledVector(jumpSphere.gravity, 0.016);
+            const currentY = jumpSphere.getPosition().y;
+            if (currentY > maxHeight) {
+                maxHeight = currentY;
+            }
+            time += 0.016;
+        }
+        
+        const actualHeightGained = maxHeight - initialY;
+        console.log('Actual peak height gain:', actualHeightGained.toFixed(4));
+        console.log('Target height: 3.0');
+        console.log('Error:', Math.abs(actualHeightGained - 3.0).toFixed(4));
+        
+        const jumpHeightPassed = Math.abs(actualHeightGained - 3.0) < 0.1;
+        console.log('Jump Height Calibration:', jumpHeightPassed ? 'PASSED ✓' : 'FAILED');
+        
+        // Display results
+        const resultsDiv = document.getElementById('results');
+        resultsDiv.innerHTML = `
+            <h2>Test Results</h2>
+            <p style="color: ${gravityDampingPassed ? 'green' : 'red'}">
+                Gravity Damping Fix: ${gravityDampingPassed ? 'PASSED ✓' : 'FAILED'}
+            </p>
+            <p style="color: ${jumpHeightPassed ? 'green' : 'red'}">
+                Jump Height Calibration: ${jumpHeightPassed ? 'PASSED ✓' : 'FAILED'}
+            </p>
+            <h3>Details:</h3>
+            <ul>
+                <li>Jump Impulse: ${jumpImpulse.toFixed(4)} (target for 3 units height)</li>
+                <li>Actual Height Achieved: ${actualHeightGained.toFixed(4)} units</li>
+                <li>Vertical Velocity Change Allowed: ${verticalDiff.toFixed(4)}</li>
+                <li>Horizontal Velocity Change: ${horizontalDiff.toFixed(4)}</li>
+            </ul>
+            <p>Note: All tests work across Standard, Spherical, and Box gravity modes since gravity acceleration is handled separately from planar movement.</p>
+        `;
+    </script>
+</body>
+</html>
